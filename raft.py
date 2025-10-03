@@ -61,4 +61,4 @@ def exec_raft(tests: str) -> None:
         argumentos = linea[1]
         procesar_comandos_raft(nodos, lider, comando, argumentos)
 
-exec_raft("casos_Raft/test_01.txt")
+# exec_raft("casos_Raft/test_01.txt")

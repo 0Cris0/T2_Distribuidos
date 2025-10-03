@@ -11,10 +11,105 @@ import itertools
 import dataclasses
 import enum
 
-import func_auxiliares as f_aux
+# Recuerda que no se permite importar otros módulos/librerías a excepción de los creados
+# por ustedes o las ya incluidas en este main.py
+
+# Variables globales
+bbdd = {}
+logs_bbdd = []
+
+def print_bbdd():
+    # Este es un print de base de datos para debuguear
+    print("Base de datos actual:")
+    max_end = 0
+    for k, v in bbdd.items():
+        print(f"  {k}: {v}")
+        if len(v) + len(k) + 3 > max_end:
+            max_end = len(v) + len(k) + 3
+
+    print(f"{max_end * "-"}")
 
 
-def funcion_paxos(test: str) -> None:
+def escribir_logs(algoritmo: str, ruta_test: str, logs: typing.List[typing.Tuple[str, str]]) -> None:
+    # Se va a escribir un txt con los logs
+    ruta_log = "logs/"
+    nombre_salida = f"{algoritmo}_{os.path.basename(ruta_test)}"
+    ruta_log = os.path.join("logs", nombre_salida)
+
+    with open(ruta_log, "w", encoding="utf-8") as f:
+        # LOGS
+        f.write("LOGS\n")
+        if logs:
+            for log in logs:
+                f.write(f"{log[0]}={log[1]}\n")
+        else:
+            f.write("No hubo logs\n")
+        
+        # BBDD
+        f.write("BASE DE DATOS\n")
+        if bbdd:
+            for k, v in bbdd.items():
+                f.write(f"{k}={v}\n")
+        else:
+            f.write("No hay datos\n")
+
+def procesar_accion(accion: str) -> bool:
+    partes = accion.split("-", 2) # Dividir en 3 partes como máximo
+    
+    # Las 3 partes son: comando, variable, valor
+    comando = partes[0]
+    variable = partes[1]
+    valor = partes[2] if len(partes) > 2 else ""
+
+    # Revisamos los distintos comandos
+    if comando == "SET":
+        
+        bbdd[variable] = valor
+        return True
+    elif comando == "ADD":
+        # Revisamos si estamos trabajando con str o int
+        valor_bbdd = bbdd.get(variable)
+        resultado = None
+        if valor_bbdd is None:
+            # Funciona como set en este caso
+            resultado = valor
+        else:
+            if str(valor_bbdd).isdigit() and valor.isdigit():
+                # En este caso, ambos son enteros
+                resultado = int(valor_bbdd) + int(valor)
+            else:
+                # En este caso, alguno de los 2 es un string
+                resultado = str(valor_bbdd) + str(valor)
+        # Ahora, asignamos el valor a la bbdd
+        bbdd[variable] = str(resultado)
+        return True
+    elif comando == "DEL":
+        bbdd.pop(variable, None) # Se elimina solo si existe
+        return True
+    return False
+
+def eliminar_comentarios(linea) -> str:
+    # Eliminamos todo lo del comentario a la derecha
+    procesado = ""
+    for c in linea:
+        if c == "#":
+            break
+        else:
+            procesado += c
+    return procesado.rstrip()
+
+def quitar_duplicados(lista):
+    vistos = set()
+    resultado = []
+    for item in lista:
+        if item not in vistos:
+            vistos.add(item)
+            resultado.append(item)
+    return resultado
+
+
+def exec_paxos(test: str) -> None:
+
     # El primer paso es leer el archivo de test
     with open(test, "r", encoding="utf-8") as f:
         lineas = f.readlines()
@@ -23,7 +118,7 @@ def funcion_paxos(test: str) -> None:
     lineas_clear = []
     for linea in lineas:
         # Eliminamos comentarios
-        procesamiento = f_aux.eliminar_comentarios(linea)
+        procesamiento = eliminar_comentarios(linea)
         if len(procesamiento) > 0:
             lineas_clear.append(procesamiento)
     
@@ -38,7 +133,7 @@ def funcion_paxos(test: str) -> None:
         s = partes[i].strip()
         if s != "":
             nodos_aceptantes.append(s)
-    nodos_aceptantes = f_aux.quitar_duplicados(nodos_aceptantes)
+    nodos_aceptantes = quitar_duplicados(nodos_aceptantes)
     nodos_aceptantes = {s: {
         "promised_n": None,
         "accepted_n": None,
@@ -53,7 +148,7 @@ def funcion_paxos(test: str) -> None:
         s = partes[i].strip()
         if s != "":
             nodos_proponentes.append(s)
-    nodos_proponentes = f_aux.quitar_duplicados(nodos_proponentes)
+    nodos_proponentes = quitar_duplicados(nodos_proponentes)
 
     # Paso 3: Iteramos sobre los eventos para procesarlos
     for i in range(2, len(lineas_clear)):
@@ -131,7 +226,7 @@ def funcion_paxos(test: str) -> None:
                 if cnt >= mayoria:
                     # Accion aceptada, se procesa
                     print(val)
-                    f_aux.procesar_accion(val)
+                    procesar_accion(val)
                     # reseteo estado nodos aceptantes activos
                     for id_acept in nodos_aceptantes.keys():
                         if nodos_aceptantes[id_acept]["alive"]:
@@ -142,10 +237,30 @@ def funcion_paxos(test: str) -> None:
 
         elif comando == "Log":
             variable_log = separados[1].strip()
-            valor_log = f_aux.bbdd.get(variable_log, "Variable no existe")
-            f_aux.logs_bbdd.append((variable_log,valor_log))
+            valor_log = bbdd.get(variable_log, "Variable no existe")
+            logs_bbdd.append((variable_log,valor_log))
 
     # Paso 4: Se escriben los logs
-    f_aux.escribir_logs("Paxos", test, f_aux.logs_bbdd)
+    escribir_logs("Paxos", test, logs_bbdd)
 
-# funcion_paxos("casos_Paxos/test_01.txt")
+
+def exec_raft(test: str) -> None:
+    # Completar con tu implementación o crea más archivos y funciones
+    print(f"Ejecutando Raft con {test}")
+    pass
+
+if __name__ == "__main__":
+    # Completar con tu implementación o crea más archivos y funciones
+
+    algoritmo = argv[1]
+    test = argv[2]
+    if algoritmo == "Paxos":
+        exec_paxos(test)
+    elif algoritmo == "Raft":
+        exec_raft(test)
+
+    # print("Mi nombre es Shinichi Kudo, tengo 17 años, reconocido como el mejor de")
+    # print("los detectives, pero unos hombres me obligaron a tomar una droga,")
+    # print("así fue como me convertí en Edogawa Conan, a pesar de ser un niño")
+    # print("mi inteligencia es la de un joven normal y para mí no hay caso")
+    # print("difícil de resolver.!")
