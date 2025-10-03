@@ -13,17 +13,130 @@ import enum
 
 import func_auxiliares as f_aux
 
-def procesar_comandos_raft(nodos, lider, comando, argumentos):
-    if(comando == "Send"):
-        print("Send")
-    elif(comando == "Spread"):
-        print("Spread")
+nodos = {}
+"""
+idea de nodo:
+    NAME = {
+        "term" = 0,
+        "timeout" = 0,
+        "t_actul" = 0
+        "activo" = True,
+        "ultimo_term_votado": -1,
+        "logs" = [],
+        "name": NAME,
+    }
+"""
+lider = None
+
+def mayoria_lider(n_aceptan, n_nodos):
+    if(n_aceptan >= (n_nodos // 2 +1)):
+        return "elegido"
+    return "no elegido"
+
+def Votacion(nodos, candidato):
+    aceptan = 1
+    rechazan = 0
+    ultimo_log_candidato = candidato["logs"][-1]
+    term_candidato = candidato["term"]
+    for nodo in nodos.keys():
+        nodo = nodos[nodo]
+        if(nodo != candidato and nodo["activo"] != False):
+            nodo = nodos[nodo]
+            if(nodo["ultimo_term_votado"] == term_candidato):
+                rechazan += 1
+                if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
+                    nodo["term"] = term_candidato
+                continue
+            if(nodo["term"] > term_candidato):
+                nodo["ultimo_term_votado"] = term_candidato #TODO: Duda si esto está bien
+                rechazan += 1
+                continue
+
+            if(len(nodo["logs"])==0):
+                aceptan+=1
+                nodo["ultimo_term_votado"] = term_candidato
+                if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
+                    nodo["term"] = term_candidato
+                continue
+            if(term_candidato == nodo["term"]):
+                ultimo_log = nodo["logs"][-1]
+                condicion_term_ultimo_log = (ultimo_log_candidato[1] >= ultimo_log[1]) # TODO: Revisar que sea >= en vez de >
+                condicion_largo_logs = (len(candidato["logs"]) >= len(nodo["logs"]))
+                if(condicion_term_ultimo_log or condicion_largo_logs):
+                    aceptan+=1
+                    nodo["ultimo_term_votado"] = term_candidato
+                    if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
+                        nodo["term"] = term_candidato
+                    continue
+                if(not condicion_term_ultimo_log):
+                    rechazan += 1
+                    nodo["ultimo_term_votado"] = term_candidato #TODO: Duda si esto está bien
+                    if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
+                        nodo["term"] = term_candidato
+                    continue
+    return mayoria_lider(aceptan, len(nodos))
+
+def enviar_heartbeat(lider, nodos):
+    for nodo in nodos.keys():
+        nodo = nodos[nodo]
+        if(nodo != lider and nodo["activo"] == True):
+            nodo["t_actual"] = 0
+
+
+
+def eleccion_lider(nodos: dict, lider: dict):
+    # TODO: Ver si las cosas cambian por referencia o no, sino retornar cosas
+    # Considerar implementar contador
+    while(lider == None):
+        for nodo in nodos.keys():
+            nodo = nodos[nodo]
+            if(nodo["activo"] == True):
+                nodo["t_actual"] +=1
+                if(nodo["t_actual"] == nodo["timeout"]):
+                    nodo["term"] += 1
+                    resultado = Votacion(nodos, nodo)
+                    if(resultado == "elegido"):
+                        lider = nodo
+                        for nodo in nodos.keys():
+                            if(nodo != lider):
+                                nodo["t_actual"] = 0
+                        break
+                    else:
+                        nodo["t_actual"] = 0
+
+def replicar(nodo_actual, logs_lider):
+    print("a")
+
+def consolidar(nodos, lider):
+    print("a")
+
+def procesar_comandos_raft(nodos, lider, comando, linea):
+    if(comando == "Send" and lider != None):
+        term_lider = lider["term"]
+        accion = linea[1]
+        lider["logs"].append((accion, term_lider))
+    elif(comando == "Spread" and lider != None):
+        lista_nodos = linea[1]
+        if(len(lista_nodos) != 0):
+            for nodo in nodos.keys():
+                nodo = nodos[nodo]
+                if(nodo["activo"] == True):
+                    if(nodo != lider and nodo["name"] in lista_nodos):
+                        replicar(nodo, lider["logs"])
+        consolidar(nodos, lider)
     elif(comando == "Stop"):
-        print("Stop")
+        name_nodo = linea[1]
+        if(name_nodo in nodos.keys()):
+            nodos[name_nodo]["activo"] = True
     elif(comando == "Start"):
-        print("Start")
+        name_nodo = linea[1]
+        if(name_nodo in nodos.keys()):
+            nodos[name_nodo]["activo"] = False
+            lider = None
+            eleccion_lider(nodos, lider)
     elif(comando == "Log"):
         print("Log")
+        # TODO: hacer esto
 
 def exec_raft(tests: str) -> None:
     """ # Completar con tu implementación o crea más archivos y funciones
@@ -43,8 +156,8 @@ def exec_raft(tests: str) -> None:
     
     # RAFT:
     # Primera línea: Nodos y timeouts
-    nodos = {}
-    lider = None
+    # nodos = {}
+    # lider = None
     linea_nodos = lineas_clear[0].split(";")
     for datos_nodo in linea_nodos:
         # nodos.append(nodo.strip())
@@ -58,7 +171,6 @@ def exec_raft(tests: str) -> None:
     for linea in range(1, len(lineas_clear)):
         linea = lineas_clear[linea].strip().split(";")
         comando = linea[0]
-        argumentos = linea[1]
-        procesar_comandos_raft(nodos, lider, comando, argumentos)
+        procesar_comandos_raft(nodos, lider, comando, linea)
 
 # exec_raft("casos_Raft/test_01.txt")
