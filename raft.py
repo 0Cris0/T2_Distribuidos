@@ -40,35 +40,49 @@ def Votacion(nodos, candidato):
     term_candidato = candidato["term"]
     for nodo in nodos.keys():
         nodo = nodos[nodo]
+        # Si es el propoio nodo o está inactivo lo ignora
         if(nodo != candidato and nodo["activo"] != False):
-            nodo = nodos[nodo]
+            # Si ya votó en el term actual, vota rechazo
             if(nodo["ultimo_term_votado"] == term_candidato):
                 rechazan += 1
                 if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
                     nodo["term"] = term_candidato
                 continue
+            # Si el term del candidato es menor que votante, vota rechazo
             if(nodo["term"] > term_candidato):
                 nodo["ultimo_term_votado"] = term_candidato #TODO: Duda si esto está bien
                 rechazan += 1
                 continue
-
+            # Si votante no tiene logs, vota a favor
             if(len(nodo["logs"])==0):
                 aceptan+=1
                 nodo["ultimo_term_votado"] = term_candidato
                 if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
                     nodo["term"] = term_candidato
                 continue
+            # Casos con igual term
             if(term_candidato == nodo["term"]):
                 ultimo_log = nodo["logs"][-1]
-                condicion_term_ultimo_log = (ultimo_log_candidato[1] >= ultimo_log[1]) # TODO: Revisar que sea >= en vez de >
                 condicion_largo_logs = (len(candidato["logs"]) >= len(nodo["logs"]))
-                if(condicion_term_ultimo_log or condicion_largo_logs):
+                # Si term del último log es term mayor que el último del actual, vota a favor
+                if(ultimo_log_candidato[1] > ultimo_log[1]):
                     aceptan+=1
                     nodo["ultimo_term_votado"] = term_candidato
                     if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
                         nodo["term"] = term_candidato
                     continue
-                if(not condicion_term_ultimo_log):
+                # Si el term del último log es igual, pero candidato tiene log >= largo
+                # Vota a favor
+                if(ultimo_log_candidato[1] == ultimo_log[1] and condicion_largo_logs):
+                    aceptan+=1
+                    nodo["ultimo_term_votado"] = term_candidato
+                    if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
+                        nodo["term"] = term_candidato
+                    continue
+                # En todo otro caso +
+                # Si el term del último log fue menor al del votante, voto rechazo
+                # if(ultimo_log_candidato[1] < ultimo_log[1]):
+                else:
                     rechazan += 1
                     nodo["ultimo_term_votado"] = term_candidato #TODO: Duda si esto está bien
                     if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
@@ -94,6 +108,7 @@ def eleccion_lider(nodos: dict, lider: dict):
                 nodo["t_actual"] +=1
                 if(nodo["t_actual"] == nodo["timeout"]):
                     nodo["term"] += 1
+                    nodo["ultimo_term_votado"] = nodo["term"]
                     resultado = Votacion(nodos, nodo)
                     if(resultado == "elegido"):
                         lider = nodo
