@@ -61,7 +61,8 @@ def Votacion(nodos, candidato):
                     nodo["term"] = term_candidato
                 continue
             # Casos con igual term
-            if(term_candidato == nodo["term"]):
+            # if(term_candidato == nodo["term"]):
+            else:
                 ultimo_log = nodo["logs"][-1]
                 condicion_largo_logs = (len(candidato["logs"]) >= len(nodo["logs"]))
                 # Si term del último log es term mayor que el último del actual, vota a favor
@@ -120,10 +121,36 @@ def eleccion_lider(nodos: dict, lider: dict):
                         nodo["t_actual"] = 0
 
 def replicar(nodo_actual, logs_lider):
-    print("a")
+    logs_actual = nodo_actual["logs"]
+    terms_logs_lider = []
+    nueva_lista = []
+    for log_l in logs_lider:
+        term = log_l[1]
+        if(term not in terms_logs_lider):
+            terms_logs_lider.append(term)
+            nueva_lista.append(log_l)
+    for log in logs_actual:
+        term = log[1]
+        if(term not in terms_logs_lider):
+            nueva_lista.append(log)
+    nodo_actual["logs"] = nueva_lista
 
 def consolidar(nodos, lider):
-    print("a")
+    term_actual = lider["term"]
+    consolidadas = []
+    for log in lider["logs"]:
+        # TODO: Implementar sistema para logs indirectos
+        contador = 0
+        for nodo in nodos:
+            nodo = nodos[nodo]
+            if(lider != nodo and log[1]==term_actual):
+                if(log in nodo["logs"]):
+                    contador+=1
+        if(contador >= len(nodos)//2 + 1):
+            consolidadas.append(log)
+    if(len(consolidadas) != 0):
+        # Mandar a BD
+        print("TODOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooo")
 
 def procesar_comandos_raft(nodos, lider, comando, linea):
     if(comando == "Send" and lider != None):
