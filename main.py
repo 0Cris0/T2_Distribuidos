@@ -12,7 +12,7 @@ import dataclasses
 import enum """
 
 from paxos import funcion_paxos
-from raft import exec_raft
+from raft import funcion_raft
 
 # Recuerda que no se permite importar otros módulos/librerías a excepción de los creados
 # por ustedes o las ya incluidas en este main.py
@@ -23,7 +23,7 @@ def exec_paxos(test: str) -> None:
 
 
 def exec_raft(test: str) -> None:
-    exec_raft(test)
+    funcion_raft(test)
 
 if __name__ == "__main__":
     # Completar con tu implementación o crea más archivos y funciones
