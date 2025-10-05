@@ -1,5 +1,5 @@
 LOGS
-criminal=vecino de la víctima
+criminal=Variable no existe
 arma homicida=cuchillo
 criminal=Variable no existe
 arma homicida=Variable no existe

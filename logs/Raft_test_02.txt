@@ -1,10 +1,9 @@
 LOGS
 sospechoso=Variable no existe
 sospechoso=Hitomi
-crimen=secuestro por romance fallido
-fallecidos=1
+crimen= por romance fallido
+fallecidos=3
 BASE DE DATOS
-fallecidos=1
-sospechoso=Gin
-crimen=secuestro por romance fallido
-victima=Ran
+fallecidos=3
+sospechoso=Hitomi
+crimen= por romance fallido

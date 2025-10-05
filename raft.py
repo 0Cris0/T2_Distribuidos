@@ -89,7 +89,7 @@ def votar_por_lider(nodos, candidato):
                 # Si el term del último log fue menor al del votante, voto rechazo
                 # if(ultimo_log_candidato[1] < ultimo_log[1]):
                 else:
-                    print(f"        - El nodo {nodo["name"]} vota RECHAZO, porque es otro caso")
+                    print(f"        - El nodo {nodo["name"]} vota RECHAZO, porque term ultimo log candidato es menor que votante")
                     rechazan += 1
                     nodo["ultimo_term_votado"] = term_candidato #TODO: Duda si esto está bien
                     if(term_candidato > nodo["term"]): #TODO: Duda si esto está bien
@@ -113,11 +113,14 @@ def eleccion_lider(nodos: dict, lider: dict):
             nodo = nodos[nodo]
             if(nodo["activo"] == True):
                 nodo["t_actual"] +=1
+                print(f" >> >Nodo {nodo["name"]}, ({nodo["t_actual"]}/{nodo["timeout"]})")
                 if(nodo["t_actual"] == nodo["timeout"]):
                     print(f"    El nodo {nodo["name"]} cumplió su timeout: {nodo["timeout"]}")
                     nodo["term"] += 1
                     nodo["ultimo_term_votado"] = nodo["term"]
                     print("    Procediendo a votar")
+                    print(nodos)
+                    print("========================")
                     resultado = votar_por_lider(nodos, nodo)
                     print(f"        El resultado es: {resultado}")
                     if(resultado == "elegido"):
@@ -164,21 +167,24 @@ def consolidar(nodos, lider):
     if(lider["logs"] != []):
         accion_final = lider["logs"][-1]
         contador = 0
-        for nodo in nodos.keys():
-            nodo = nodos[nodo]
-            if(accion_final in nodo["logs"] and nodo["activo"] == True):
-                contador += 1
-        if(contador >= len(nodos)//2 + 1):
-            acciones_consolidadas += lider["logs"]
+        if(accion_final[1] == lider["term"]):
+            for nodo in nodos.keys():
+                nodo = nodos[nodo]
+                if(accion_final in nodo["logs"] and nodo["activo"] == True):
+                    contador += 1
+            if(contador >= len(nodos)//2 + 1):
+                acciones_consolidadas += lider["logs"]
     if(len(acciones_consolidadas) != 0):
         # Osea, existen acciones consolidadas
         for accion in acciones_consolidadas:
+            print(f"        + Consolidando acción '{accion[0]}'")
             f_aux.procesar_accion(accion[0])
         # Ahora toca borrar todo
         for nodo in nodos.keys():
             nodo = nodos[nodo]
-            if(nodo["activo"] == True):
-                nodo["logs"] = []
+            # nodo["logs"] = []
+            """ if(nodo["activo"] == True):
+                nodo["logs"] = [] """
     return (lider, nodos)
 
 def procesar_comandos_raft(nodos, lider, comando, linea):
@@ -186,14 +192,14 @@ def procesar_comandos_raft(nodos, lider, comando, linea):
     if(lider == None):
         print(f"-- No hay líder, eligiendo uno")
         (lider, nodos) = eleccion_lider(nodos, lider)
-        print(f"- El lider elegido es: {lider}")
+        print(f"    - El lider elegido es: {lider}")
 
     if(comando == "Send" and lider != None):
-        print(f"-- SEND ------------------")
+        print(f"-- SEND  '{linea[1]}' ------------------")
         term_lider = lider["term"]
         accion = linea[1]
         lider["logs"].append((accion, term_lider))
-        print(f"- El lider actual queda: {lider}")
+        print(f"    - El lider actual queda: {lider}")
     elif(comando == "Stop"):
         print(f"-- STOP, {linea[1]} ------------------")
         name_nodo = linea[1]
@@ -208,7 +214,7 @@ def procesar_comandos_raft(nodos, lider, comando, linea):
         if(name_nodo in nodos):
             nodos[name_nodo]["activo"] = True
     elif(comando == "Spread" and lider != None):
-        print(f"-- SPREAD ------------------")
+        print(f"-- SPREAD a nodos '{linea[1]}'------------------")
         lista_nodos = linea[1]
         if(len(lista_nodos) != 0):
             for nodo in nodos.keys():
@@ -220,6 +226,7 @@ def procesar_comandos_raft(nodos, lider, comando, linea):
             (lider, nodos) = consolidar(nodos, lider)
     elif(comando == "Log"):
         print(f"-- LOG, {linea[1]} ------------------")
+        # (lider, nodos) = consolidar(nodos, lider)
         variable_log = linea[1].strip()
         valor_log = f_aux.bbdd.get(variable_log, "Variable no existe")
         f_aux.logs_bbdd.append((variable_log,valor_log))
@@ -283,4 +290,4 @@ def funcion_raft(tests: str) -> None:
 
     f_aux.escribir_logs("Raft", tests, f_aux.logs_bbdd)
 
-# exec_raft("casos_Raft/test_01.txt")
+funcion_raft("casos_Raft/test_02.txt")
