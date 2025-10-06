@@ -20,7 +20,9 @@ fue escrito por humanos, por lo que el uso que se le ha dado ha sido bien espec�
 corregir errores, la interpretación de los mismos y aclaramiento de dudas, en complemento con la información
 que se encuentra disponible en GitHub discussions. Sin embargo, ninguna de las salidas para el testing y debugeo entregadas
 por el modelo de lenguaje se han utilizado de manera textual sin realizar modificaciones y adaptaciones.
+- Caso Raft: >>>>>>>>>>>>>>> COMPLETAR <<<<<<<<<<<<<<<<<
+
+## Capturas de pantalla del uso de modelos de lenguaje.
 ![Referencia 1](imgs/paxos1.png)
 ![Referencia 2](imgs/paxos2.png)
 ![Referencia 1](imgs/paxos3.png)
-- Caso Raft: >>>>>>>>>>>>>>> COMPLETAR <<<<<<<<<<<<<<<<<
