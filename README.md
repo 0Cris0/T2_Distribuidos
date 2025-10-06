@@ -11,7 +11,8 @@ Integrantes:
 Al ejecutar los tests de Paxos, se tiene que todos devuelven el output esperado, por lo que cumplen con lo solicitado.
 
 ## 2. Ejecutar python3 main.py Raft casos_Raft/test_01.txt
->>>>>>>>>>>>>> COMPLETAR <<<<<<<<<<<<
+Al ejecutar los tests de Raft, se tiene que todos devuelven el output esperado, por lo que cumplen con lo solicitado.
+
 
 ## 3. Con respecto al uso de herramientas generativas de código
 Se ha hecho uso de herramienta de generación de texto para usos muy específicos:
