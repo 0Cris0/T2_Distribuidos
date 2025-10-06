@@ -1,9 +1,9 @@
 LOGS
 sospechoso=Variable no existe
 sospechoso=Hitomi
-crimen= por romance fallido
-fallecidos=3
+crimen=asesinato por romance fallido
+fallecidos=1
 BASE DE DATOS
-fallecidos=3
+fallecidos=1
 sospechoso=Hitomi
-crimen= por romance fallido
+crimen=asesinato por romance fallido
