@@ -1,15 +1,5 @@
-""" from __future__ import annotations  # Solo lo dejo por si lo necesitan. Lo pueden eliminar
-from sys import argv """
-
-# Librerías adicionales por si las necesitan
-# No son obligatorias y no tampoco tienen que usarlas todas
-# No pueden agregar ningun otro import que no esté en esta lista
 import os
 import typing
-import collections
-import itertools
-import dataclasses
-import enum
 
 bbdd = {}
 logs_bbdd = []
@@ -45,7 +35,7 @@ def print_bbdd():
     print(f"{'-' * max_end}")
 
 
-def escribir_logs(algoritmo: str, ruta_test: str, logs: typing.List[typing.Tuple[str, str]]) -> None:
+def escribir_logs(algoritmo: str, ruta_test: str, logs: typing.List[typing.Tuple[str, str]]):
     # Se va a escribir un txt con los logs
     ruta_log = "logs/"
     nombre_salida = f"{algoritmo}_{os.path.basename(ruta_test)}"

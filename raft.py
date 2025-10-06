@@ -1,32 +1,4 @@
-from __future__ import annotations  # Solo lo dejo por si lo necesitan. Lo pueden eliminar
-from sys import argv
-
-# Librerías adicionales por si las necesitan
-# No son obligatorias y no tampoco tienen que usarlas todas
-# No pueden agregar ningun otro import que no esté en esta lista
-import os
-import typing
-import collections
-import itertools
-import dataclasses
-import enum
-
 import func_auxiliares as f_aux
-
-# nodos = {}
-"""
-idea de nodo:
-    NAME = {
-        "term" = 0,
-        "timeout" = 0,
-        "t_actul" = 0
-        "activo" = True,
-        "ultimo_term_votado": -1,
-        "logs" = [],
-        "name": NAME,
-    }
-"""
-# lider = None
 
 def mayoria_lider(n_aceptan, n_nodos):
     if(n_aceptan >= (n_nodos // 2 +1)):
@@ -73,7 +45,8 @@ def votar_por_lider(nodos, candidato):
                 ultimo_log = nodo["logs"][-1]
                 condicion_largo_logs = (len(candidato["logs"]) >= len(nodo["logs"]))
 
-                # Si term del último log es term mayor que el último del actual, vota a favor
+                # Si term del último log es term mayor que el último del actual,
+                #  vota a favor
                 if(ultimo_log_candidato[1] > ultimo_log[1]):
                     aceptan+=1
                     nodo["ultimo_term_votado"] = term_candidato
@@ -99,23 +72,6 @@ def votar_por_lider(nodos, candidato):
                     nodos = aumentar_term(nodos, nodo["name"], term_candidato)
                     continue
     return mayoria_lider(aceptan, len(nodos))
-
-
-def imprimir_activos(nodos: dict):
-    return 
-    #print("=== NODOS ACTIVOS ===")
-    for nombre, datos in nodos.items():
-        if datos.get("activo"):
-            logs = (
-                ", ".join(f"{log[0]}@{log[1]}" for log in datos["logs"])
-                if datos["logs"]
-                else "-"
-            )
-            print(
-                f"{nombre}: term={datos['term']} | timeout={datos['timeout']} | "
-                f"ultimo_voto={datos['ultimo_term_votado']} | logs=[{logs}]"
-            )
-    #print("======================")
 
 
 def eleccion_lider(nodos: dict, lider: dict):
@@ -199,7 +155,8 @@ def consolidar(nodos, lider, ya_consolidadas):
                                     if(subaccion == accion):
                                         break             
     acciones_consolidadas = sorted(acciones_consolidadas, key=lambda x: x[1])
-
+    # Nota: utilicé ChatGPT para encontrar una manera de sortear esto
+    
     if(len(acciones_consolidadas) != 0):
         # Osea, existen acciones consolidadas
         for accion in acciones_consolidadas:
@@ -267,7 +224,6 @@ def funcion_raft(tests: str) -> None:
         procesamiento = f_aux.eliminar_comentarios(linea)
         if len(procesamiento) > 0:
             lineas_clear.append(procesamiento)
-            # #print(procesamiento)
     
     # RAFT:
     # Primera línea: Nodos y timeouts
@@ -276,7 +232,6 @@ def funcion_raft(tests: str) -> None:
     ya_consolidadas = []
     linea_nodos = lineas_clear[0].split(";")
     for datos_nodo in linea_nodos:
-        # nodos.append(nodo.strip())
         datos_nodo = datos_nodo.strip().split(",")
         nombre_nodo = datos_nodo[0]
         timeout = int(datos_nodo[1])
@@ -286,7 +241,6 @@ def funcion_raft(tests: str) -> None:
     for linea in range(1, len(lineas_clear)):
         linea = lineas_clear[linea].strip().split(";")
         comando = linea[0]
-        (lider, nodos, ya_consolidadas) = procesar_comandos_raft(nodos, lider, comando, linea, ya_consolidadas)
+        (lider, nodos, ya_consolidadas) = procesar_comandos_raft(
+            nodos, lider, comando, linea, ya_consolidadas)
     f_aux.escribir_logs("Raft", tests, f_aux.logs_bbdd)
-
-# funcion_raft("casos_Raft/test_02.txt")

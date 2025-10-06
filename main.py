@@ -1,16 +1,6 @@
 from __future__ import annotations  # Solo lo dejo por si lo necesitan. Lo pueden eliminar
 from sys import argv
 
-# Librerías adicionales por si las necesitan
-# No son obligatorias y no tampoco tienen que usarlas todas
-# No pueden agregar ningun otro import que no esté en esta lista
-""" import os
-import typing
-import collections
-import itertools
-import dataclasses
-import enum """
-
 from paxos import funcion_paxos
 from raft import funcion_raft
 

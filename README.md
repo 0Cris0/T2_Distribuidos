@@ -20,7 +20,12 @@ fue escrito por humanos, por lo que el uso que se le ha dado ha sido bien espec�
 corregir errores, la interpretación de los mismos y aclaramiento de dudas, en complemento con la información
 que se encuentra disponible en GitHub discussions. Sin embargo, ninguna de las salidas para el testing y debugeo entregadas
 por el modelo de lenguaje se han utilizado de manera textual sin realizar modificaciones y adaptaciones.
-- Caso Raft: >>>>>>>>>>>>>>> COMPLETAR <<<<<<<<<<<<<<<<<
+
+- Caso Raft: Se utilizó mayormente para entender mejor el funcionamiento de raft (lógica de los terms y condiciones de 
+aceptar y rechazar) y así poder plantear el código. Pero en cuanto a código, solo se utilizó para plantear una función 
+sencilla que permitiera ordenar los logs de los nodos:
+"acciones_consolidadas = sorted(acciones_consolidadas, key=lambda x: x[1])"
+(Ver línea 157 y 133, raft.py)
 
 ## Capturas de pantalla del uso de modelos de lenguaje.
 ![Referencia 1](imgs/paxos1.png)
