@@ -42,7 +42,7 @@ def print_bbdd():
         if len(v) + len(k) + 3 > max_end:
             max_end = len(v) + len(k) + 3
 
-    print(f"{max_end * "-"}")
+    print(f"{'-' * max_end}")
 
 
 def escribir_logs(algoritmo: str, ruta_test: str, logs: typing.List[typing.Tuple[str, str]]) -> None:
